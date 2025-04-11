@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Attendance System</title>
+    <style>
+        :root {
+            --primary: #4CAF50;
+            --secondary: #2196F3;
+            --danger: #f44336;
+            --dark: #333;
+            --light: #f4f4f4;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f9f9f9;
+            color: var(--dark);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        header {
+            background-color: var(--primary);
+            color: white;
+            padding: 1rem 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        header h1 {
+            display: flex;
+            align-items: center;
+        }
+
+        header h1 svg {
+            margin-right: 10px;
+        }
+
+        nav {
+            background-color: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+        }
+
+        .nav-links li a {
+            display: block;
+            padding: 1rem;
+            text-decoration: none;
+            color: var(--dark);
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .nav-links li a:hover,
+        .nav-links li a.active {
+            color: var(--primary);
+            background-color: rgba(76, 175, 80, 0.1);
+        }
+
+        main {
+            min-height: calc(100vh - 200px);
+            padding: 2rem 0;
+        }
+
+        .card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .card-title {
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #eee;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+        }
+
+        .card-title svg {
+            margin-right: 10px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background-color: var(--secondary);
+        }
+
+        .btn-danger {
+            background-color: var(--danger);
+        }
+
+        .video-container {
+            width: 100%;
+            max-width: 640px;
+            margin: 0 auto;
+            border: 3px solid var(--primary);
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        #video {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        table th, table td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        table th {
+            background-color: rgba(76, 175, 80, 0.1);
+            color: var(--primary);
+        }
+
+        .recognized-person {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            right: 10px;
+            background-color: rgba(0,0,0,0.7);
+            color: white;
+            padding: 0.5rem;
+            border-radius: 4px;
+            text-align: center;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        footer {
+            background-color: var(--dark);
+            color: white;
+            text-align: center;
+            padding: 1rem 0;
+            margin-top: 2rem;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            .nav-container {
+                flex-direction: column;
+            }
+            .nav-links {
+                width: 100%;
+                flex-direction: column;
+            }
+            .nav-links li {
+                width: 100%;
+                text-align: center;
+            }
+            .video-container {
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="9" cy="7" r="4"></circle>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                </svg>
+                Smart Attendance System
+            </h1>
+        </div>
+    </header>
+
+    <nav>
+        <div class="container nav-container">
+            <ul class="nav-links">
+                <li><a href="#" class="tab-link active" data-tab="dashboard">Dashboard</a></li>
+                <li><a href="#" class="tab-link" data-tab="register">Register Face</a></li>
+                <li><a href="#" class="tab-link" data-tab="attendance">Take Attendance</a></li>
+                <li><a href="#" class="tab-link" data-tab="reports">View Reports</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main>
+        <div class="container">
+            <div id="dashboard" class="tab-content active">
+                <div class="card">
+                    <h2 class="card-title">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="3" width="7" height="7"></rect>
+                            <rect x="14" y="3" width="7" height="7"></rect>
+                            <rect x="14" y="14" width="7" height="7"></rect>
+                            <rect x="3" y="14" width="7" height="7"></rect>
+                        </svg>
+                        Dashboard
+                    </h2>
+                    <div class="dashboard-stats">
+                        <div class="row">
+                            <div class="col">
+                                <div class="stat-card">
+                                    <h3>Total Registered</h3>
+                                    <p id="total-registered">0</p>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="stat-card">
+                                    <h3>Today's Attendance</h3>
+                                    <p id="today-attendance">0</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="recent-activity">
+                        <h3>Recent Activity</h3>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Date</th>
+                                    <th>Time</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recent-activity-body">
+                                <tr>
+                                    <td colspan="3">No recent activity</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="register" class="tab-content">
+                <div class="card">
+                    <h2 class="card-title">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="8.5" cy="7" r="4"></circle>
+                            <line x1="20" y1="8" x2="20" y2="14"></line>
+                            <line x1="23" y1="11" x2="17" y2="11"></line>
+                        </svg>
+                        Register New Face
+                    </h2>
+                    <div class="form-group">
+                        <label for="register-name">Full Name</label>
+                        <input type="text" id="register-name" class="form-control" placeholder="Enter full name">
+                    </div>
+                    <div class="video-container">
+                        <video id="register-video" autoplay></video>
+                        <canvas id="register-canvas" class="hidden"></canvas>
+                    </div>
+                    <div class="controls">
+                        <button id="start-register" class="btn">Start Camera</button>
+                        <button id="capture-face" class="btn" disabled>Capture Face</button>
+                        <button id="save-face" class="btn btn-secondary" disabled>Save</button>
+                    </div>
+                    <div id="register-status" class="mt-3"></div>
+                </div>
+            </div>
+
+            <div id="attendance" class="tab-content">
+                <div class="card">
+                    <h2 class="card-title">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                            <polyline points="10 9 9 9 8 9"></polyline>
+                        </svg>
+                        Take Attendance
+                    </h2>
+                    <div class="video-container">
+                        <video id="attendance-video" autoplay></video>
+                        <div id="recognized-person" class="recognized-person hidden">
+                            Recognized: <span id="recognized-name">Unknown</span>
+                        </div>
+                    </div>
+                    <div class="controls">
+                        <button id="start-attendance" class="btn">Start Attendance</button>
+                        <button id="stop-attendance" class="btn btn-danger" disabled>Stop</button>
+                    </div>
+                    <div id="attendance-status"></div>
+                </div>
+            </div>
+
+            <div id="reports" class="tab-content">
+                <div class="card">
+                    <h2 class="card-title">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path>
+                            <path d="M22 12A10 10 0 0 0 12 2v10z"></path>
+                        </svg>
+                        Attendance Reports
+                    </h2>
+                    <div class="form-group">
+                        <label for="report-date">Select Date</label>
+                        <input type="date" id="report-date" class="form-control">
+                    </div>
+                    <button id="generate-report" class="btn">Generate Report</button>
+
+                    <div class="report-results mt-4">
+                        <h3>Attendance Log</h3>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Date</th>
+                                    <th>Time</th>
+                                </tr>
+                            </thead>
+                            <tbody id="report-body">
+                                <tr>
+                                    <td colspan="3">No data available</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>Smart Attendance System &copy; 2025</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+    const tabLinks = document.querySelectorAll('.tab-link');
+    const tabContents = document.querySelectorAll('.tab-content');
+
+    tabLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+
+            tabLinks.forEach(l => l.classList.remove('active'));
+            tabContents.forEach(c => c.classList.remove('active'));
+
+            this.classList.add('active');
+            const tabId = this.getAttribute('data-tab');
+            document.getElementById(tabId).classList.add('active');
+
+            stopAllVideoStreams();
+
+            if (tabId === 'dashboard') {
+                updateDashboard();
+            }
+        });
+    });
+
+    let registerStream = null;
+    let attendanceStream = null;
+    let recognitionInterval = null;
+
+    const startRegisterBtn = document.getElementById('start-register');
+    const captureBtn = document.getElementById('capture-face');
+    const saveBtn = document.getElementById('save-face');
+    const registerVideo = document.getElementById('register-video');
+    const registerCanvas = document.getElementById('register-canvas');
+    const registerStatus = document.getElementById('register-status');
+
+    startRegisterBtn.addEventListener('click', function() {
+        if (registerStream) {
+            stopRegisterStream();
+            startRegisterBtn.textContent = 'Start Camera';
+            captureBtn.disabled = true;
+            return;
+        }
+
+        startRegisterBtn.textContent = 'Stop Camera';
+
+        const name = document.getElementById('register-name').value;
+        if (!name) {
+            registerStatus.innerHTML = '<div style="color: red;">Please enter a name first.</div>';
+            startRegisterBtn.textContent = 'Start Camera';
+            return;
+        }
+
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(stream => {
+                registerStream = stream;
+                registerVideo.srcObject = stream;
+                captureBtn.disabled = false;
+                registerStatus.innerHTML = '<div style="color: green;">Camera started. Position your face and click Capture.</div>';
+            })
+            .catch(err => {
+                registerStatus.innerHTML = `<div style="color: red;">Camera error: ${err.message}</div>`;
+                startRegisterBtn.textContent = 'Start Camera';
+            });
+    });
+
+    captureBtn.addEventListener('click', function() {
+        const ctx = registerCanvas.getContext('2d');
+        registerCanvas.width = registerVideo.videoWidth;
+        registerCanvas.height = registerVideo.videoHeight;
+        ctx.drawImage(registerVideo, 0, 0, registerCanvas.width, registerCanvas.height);
+
+        registerVideo.classList.add('hidden');
+        registerCanvas.classList.remove('hidden');
+        saveBtn.disabled = false;
+        captureBtn.textContent = 'Recapture';
+        registerStatus.innerHTML = '<div style="color: blue;">Face captured. Click Save to register or Recapture if needed.</div>';
+    });
+
+    saveBtn.addEventListener('click', function() {
+        const name = document.getElementById('register-name').value;
+
+        registerCanvas.toBlob(blob => {
+            const formData = new FormData();
+            formData.append('face_image', blob, 'face.jpg');
+            formData.append('name', name);
+
+            registerStatus.innerHTML = '<div style="color: blue;">Processing...</div>';
+
+            fetch('/api/register', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    registerStatus.innerHTML = `<div style="color: green;">${data.message}</div>`;
+
+                    document.getElementById('register-name').value = '';
+                    registerVideo.classList.remove('hidden');
+                    registerCanvas.classList.add('hidden');
+                    stopRegisterStream();
+                    startRegisterBtn.textContent = 'Start Camera';
+                    captureBtn.disabled = true;
+                    saveBtn.disabled = true;
+                    captureBtn.textContent = 'Capture Face';
+
+                    updateDashboard();
+                } else {
+                    registerStatus.innerHTML = `<div style="color: red;">${data.message}</div>`;
+                }
+            })
+            .catch(error => {
+                registerStatus.innerHTML = `<div style="color: red;">Error: ${error}</div>`;
+            });
+        }, 'image/jpeg', 0.95);
+    });
+
+    const startAttendanceBtn = document.getElementById('start-attendance');
+    const stopAttendanceBtn = document.getElementById('stop-attendance');
+    const attendanceVideo = document.getElementById('attendance-video');
+    const recognizedPerson = document.getElementById('recognized-person');
+    const recognizedName = document.getElementById('recognized-name');
+    const attendanceStatus = document.getElementById('attendance-status');
+
+    startAttendanceBtn.addEventListener('click', function() {
+        startAttendanceBtn.disabled = true;
+        stopAttendanceBtn.disabled = false;
+
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(stream => {
+                attendanceStream = stream;
+                attendanceVideo.srcObject = stream;
+                attendanceStatus.innerHTML = '<div style="color: green;">Attendance system started. Recognizing faces...</div>';
+
+                startFaceRecognition();
+            })
+            .catch(err => {
+                attendanceStatus.innerHTML = `<div style="color: red;">Camera error: ${err.message}</div>`;
+                startAttendanceBtn.disabled = false;
+                stopAttendanceBtn.disabled = true;
+            });
+    });
+
+    stopAttendanceBtn.addEventListener('click', function() {
+        stopAttendanceStream();
+        startAttendanceBtn.disabled = false;
+        stopAttendanceBtn.disabled = true;
+        recognizedPerson.classList.add('hidden');
+        attendanceStatus.innerHTML = '<div>Attendance system stopped.</div>';
+    });
+
+    function startFaceRecognition() {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+
+        recognitionInterval = setInterval(() => {
+            if (!attendanceStream) return;
+
+            canvas.width = attendanceVideo.videoWidth;
+            canvas.height = attendanceVideo.videoHeight;
+            ctx.drawImage(attendanceVideo, 0, 0, canvas.width, canvas.height);
+
+            const imageData = canvas.toDataURL('image/jpeg', 0.8);
+
+            fetch('/api/recognize', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ image: imageData })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.faces.length > 0) {
+                    const face = data.faces[0];
+                    recognizedName.textContent = face.name;
+                    recognizedPerson.classList.remove('hidden');
+
+                    if (face.attendance_marked && face.name !== "Unknown") {
+                        updateAttendanceCount();
+                        updateRecentActivity(face.name);
+                    }
+                } else {
+                    recognizedPerson.classList.add('hidden');
+                }
+            })
+            .catch(error => {
+                console.error('Face recognition error:', error);
+                attendanceStatus.innerHTML += `<div style="color: red;">Recognition error: ${error}</div>`;
+            });
+        }, 2000);
+    }
+
+    const generateReportBtn = document.getElementById('generate-report');
+    const reportBody = document.getElementById('report-body');
+
+    generateReportBtn.addEventListener('click', function() {
+        const date = document.getElementById('report-date').value;
+        if (!date) {
+            alert('Please select a date');
+            return;
+        }
+
+        reportBody.innerHTML = '<tr><td colspan="3">Loading data...</td></tr>';
+
+        fetch('/api/attendance/report', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ date: date })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                if (data.entries.length === 0) {
+                    reportBody.innerHTML = '<tr><td colspan="3">No attendance records for this date</td></tr>';
+                } else {
+                    let html = '';
+                    data.entries.forEach(entry => {
+                        html += `
+                            <tr>
+                                <td>${entry.name}</td>
+                                <td>${formatDate(entry.date)}</td>
+                                <td>${entry.time}</td>
+                            </tr>
+                        `;
+                    });
+                    reportBody.innerHTML = html;
+                }
+            } else {
+                reportBody.innerHTML = `<tr><td colspan="3">Error: ${data.message}</td></tr>`;
+            }
+        })
+        .catch(error => {
+            reportBody.innerHTML = `<tr><td colspan="3">Error: ${error}</td></tr>`;
+        });
+    });
+
+    function updateDashboard() {
+        fetch('/api/registered')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('total-registered').textContent = data.count;
+                }
+            })
+            .catch(console.error);
+
+        fetch('/api/attendance/today')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('today-attendance').textContent = data.count;
+                }
+            })
+            .catch(console.error);
+
+        fetch('/api/recent_activity')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.activities.length > 0) {
+                    const recentActivityBody = document.getElementById('recent-activity-body');
+                    let html = '';
+                    data.activities.forEach(activity => {
+                        html += `
+                            <tr>
+                                <td>${activity.name}</td>
+                                <td>${formatDate(activity.date)}</td>
+                                <td>${activity.time}</td>
+                            </tr>
+                        `;
+                    });
+                    recentActivityBody.innerHTML = html;
+                }
+            })
+            .catch(console.error);
+    }
+
+    function updateAttendanceCount() {
+        fetch('/api/attendance/today')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('today-attendance').textContent = data.count;
+                }
+            })
+            .catch(console.error);
+    }
+
+    function updateRecentActivity(name) {
+        fetch('/api/recent_activity')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.activities.length > 0) {
+                    const recentActivityBody = document.getElementById('recent-activity-body');
+                    let html = '';
+                    data.activities.forEach(activity => {
+                        html += `
+                            <tr>
+                                <td>${activity.name}</td>
+                                <td>${formatDate(activity.date)}</td>
+                                <td>${activity.time}</td>
+                            </tr>
+                        `;
+                    });
+                    recentActivityBody.innerHTML = html;
+                }
+            })
+            .catch(console.error);
+    }
+
+    function stopRegisterStream() {
+        if (registerStream) {
+            registerStream.getTracks().forEach(track => track.stop());
+            registerStream = null;
+        }
+    }
+
+    function stopAttendanceStream() {
+        if (attendanceStream) {
+            attendanceStream.getTracks().forEach(track => track.stop());
+            attendanceStream = null;
+        }
+        clearInterval(recognitionInterval);
+        recognitionInterval = null;
+    }
+
+    function stopAllVideoStreams() {
+        stopRegisterStream();
+        stopAttendanceStream();
+        startRegisterBtn.textContent = 'Start Camera';
+        captureBtn.disabled = true;
+        saveBtn.disabled = true;
+        startAttendanceBtn.disabled = false;
+        stopAttendanceBtn.disabled = true;
+    }
+
+    function formatDate(dateStr) {
+        const date = new Date(dateStr);
+        return date.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
+        });
+    }
+
+    updateDashboard();
+
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('report-date').value = today;
+});
+    </script>
+</body>
+</html>
