@@ -15,7 +15,7 @@ ENCODINGS_FILE = os.path.join(DATA_PATH, "face_encodings.pkl")
 LOG_FILE = "attendance_log.csv"
 KNOWN_ENCODINGS = []
 KNOWN_NAMES = []
-TOLERANCE = 0.5
+TOLERANCE = 0.6
 
 if not os.path.exists(DATA_PATH):
     os.makedirs(DATA_PATH)
