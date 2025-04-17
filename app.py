@@ -7,6 +7,9 @@ from flask import Flask, request, jsonify, render_template, send_from_directory
 from datetime import datetime
 import base64
 import json
+import socket
+import psutil
+
 
 app = Flask(__name__)
 
@@ -146,7 +149,7 @@ def recognize_face():
                 face_distances = face_recognition.face_distance(KNOWN_ENCODINGS, face_encoding)
                 best_match_index = np.argmin(face_distances)
 
-                if face_distances[best_match_index] <= TOLERANCE:
+                if face_distances[best_match_index] <= TOLERANCE and get_wifi_ip()=="192.168.161.12":
                     name = KNOWN_NAMES[best_match_index]
                     attendance_marked = mark_attendance(name)
 
@@ -238,6 +241,21 @@ def recent_activity():
         'success': True,
         'activities': activities
     })
+
+def get_wifi_ip():
+    wifi_keywords = ['wi-fi', 'wlan', 'wireless']
+
+    interfaces = psutil.net_if_addrs()
+    stats = psutil.net_if_stats()
+
+    for interface_name in interfaces:
+        name_lower = interface_name.lower()
+        if any(keyword in name_lower for keyword in wifi_keywords):
+            if stats[interface_name].isup:
+                for snic in interfaces[interface_name]:
+                    if snic.family == socket.AF_INET:
+                        return f"{snic.address}"
+    return "false"
 
 if __name__ == '__main__':
     load_encodings()
