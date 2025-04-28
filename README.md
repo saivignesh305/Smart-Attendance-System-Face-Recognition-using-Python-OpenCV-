@@ -1,5 +1,7 @@
 #Don't Forget to Install all the Requirements from the Requirements.txt file
+
 #main.py is the raw logic for the Smart Attendance Sytem
+
 #run app.py
 
 🔧 Tools & Technologies: Python, OpenCV, face_recognition, NumPy, Pickle, CSV
